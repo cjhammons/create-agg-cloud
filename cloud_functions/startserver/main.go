@@ -1,4 +1,4 @@
-package p
+package startserver
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func startInstance(w http.ResponseWriter, r *http.Request) {
+func StartServer(w http.ResponseWriter, r *http.Request) {
 	// Project and Zone configuration
 	projectID := os.Getenv("project_id")
 	zone := os.Getenv("zone")
@@ -86,6 +86,7 @@ func getServerIP(instanceName string) (string, error) {
 }
 
 func instanceIsReady(projectID, zone, instanceName string) bool {
+	// TODO
 	// This would typically involve checking the instance status
 	// or perhaps making a connection attempt to the Minecraft server
 	return true // Placeholder for a more robust check
