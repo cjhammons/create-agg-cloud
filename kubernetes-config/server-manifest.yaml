@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: server
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minecraft-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: my-minecraft-disk # Ensure this disk exists or create it in GCP
+    fsType: ext4
+---
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: minecraft-pvc
+    namespace: server
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: standard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft-server-deployment
+  namespace: server
+  labels:
+    app: minecraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      containers:
+        - name: minecraft
+          image: itzg/minecraft-server:latest
+          ports:
+            - containerPort: 25565
+          volumeMounts:
+            - mountPath: /data
+              name: minecraft-data
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: PACKWIZ_URL
+              value: https://raw.githubusercontent.com/fredo1029/Create-Agriculture/test-and-world-upload/pack.toml
+            - name: TYPE
+              value: NEOFORGE
+            - name: NEOFORGE_VERSION
+              value: 47.1.106
+            - name: VERSION 
+              value: 1.20.1
+            - name: INIT_MEMORY
+              value: "4G"
+            - name: MAX_MEMORY
+              value: "8G"
+            - name: JAVA_OPTS
+              value: "-Xms4G -Xmx8G"
+          resources:
+            requests:
+              memory: "8Gi"
+              cpu: "2"
+      volumes:
+        - name: minecraft-data
+          persistentVolumeClaim:
+            claimName: minecraft-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-service
+  namespace: server
+spec:
+  selector:
+    app: minecraft
+  ports:
+    - protocol: TCP
+      port: 25565
+      targetPort: 25565
+  type: LoadBalancer
+
