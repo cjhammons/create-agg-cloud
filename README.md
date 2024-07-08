@@ -1,1 +1,1 @@
-kubectl exec -n server -it minecraft-server-deployment-5dbcd59687-7fxxc -- rcon-cli
+Config files for a cloud hosted minecraft server. Still in experimental phase, will update this readme once the final architecture has been decided.
