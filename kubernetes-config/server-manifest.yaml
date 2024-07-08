@@ -76,6 +76,23 @@ spec:
             requests:
               memory: "8Gi"
               cpu: "2"
+        # https://github.com/vincss/mcsleepingserverstarter?tab=readme-ov-file
+        - name: sleepingserverstarter
+          image: ghcr.io/vincss/mcsleepingserverstarter:latest
+          ports:
+            - containerPort: 25565
+          volumeMounts:
+            - mountPath: /data
+              name: minecraft-data
+          env:
+            - name: serverPort
+              value: "25565"
+            - name: minecraftCommand
+              value: "java -jar /data/paper.jar nogui"
+            - name: serverOnlineMode
+              value: "true"
+            - name: startMinecraft
+              value: "true"
       volumes:
         - name: minecraft-data
           persistentVolumeClaim:
