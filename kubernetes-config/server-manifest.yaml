@@ -16,19 +16,33 @@ spec:
   gcePersistentDisk:
     pdName: my-minecraft-disk # Ensure this disk exists or create it in GCP
     fsType: ext4
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   labels:
+#     server: survive-backups
+#   name: survive-backups
+#   namespace: server
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 500Mi
 ---
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: minecraft-pvc
-    namespace: server
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: 10Gi
-    storageClassName: standard
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minecraft-pvc
+  namespace: server
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -76,10 +90,32 @@ spec:
             requests:
               memory: "8Gi"
               cpu: "2"
+        # - name: backup
+        #   image: itzg/mc-backup:latest
+        #   securityContext:
+        #     runAsUser: 1000
+        #   env:
+        #     - name: INTERVAL_SEC
+        #       value: "21600"
+        #     - name: BACKUP_NAME
+        #       value: minecraft-backup
+        #     - name: PRUNE_BACKUPS_DAYS
+        #       value: "2"
+        #     - name: BACKUP_INTERVAL
+        #       value: "2h"
+        #   volumeMounts:
+        #     - mountPath: /data
+        #       name: minecraft-data
+        #       readOnly: true
+        #     - mountPath: /backups
+        #       name: backups
       volumes:
         - name: minecraft-data
           persistentVolumeClaim:
             claimName: minecraft-pvc
+#         - name: backups
+#           persistentVolumeClaim:
+#             claimName: survive-backups
 ---
 apiVersion: v1
 kind: Service
